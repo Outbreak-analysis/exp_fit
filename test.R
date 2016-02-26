@@ -24,8 +24,7 @@ fit.all <- function(countries) {
   fit = data.frame()
   country.names <- names(countries)
   for (name in country.names) {
-    Name = capitalize(name)
-    data = pick.country(ebola, Name)
+    data = pick.country(ebola, name)
     res=exp_fit(data$times, data$cases,
                 theta0=countries[[name]]$theta0,
                 countries[[name]]$start,
@@ -34,14 +33,15 @@ fit.all <- function(countries) {
     lambdas = rbind(lambdas, data.frame(r=res$result["lambda"],
                                         lower=res$result["lower"],
                                         upper=res$result["upper"]))
-    fit = rbind(fit, cbind(data, legend="cases", country=Name))
-    fit = rbind(fit, cbind(res$fit, legend="fit", country=Name))
+    fit = rbind(fit, cbind(data, legend="cases", country=name))
+    fit = rbind(fit, cbind(res$fit, legend="fit", country=name))
   }
+  rownames(lambdas) = country.names
   list(lambdas=lambdas, fit=fit)
 }
 
 add.country <- function(countries=list(), name, start=1, theta0=c(x0=1, lambda=0.1, K=10, alpha=0.5)) {
-    countries[[name]] = list(start=start, theta0=theta0)
+    countries[[capitalize(name)]] = list(start=start, theta0=theta0)
     countries
 }
 
