@@ -26,14 +26,17 @@ fit.all <- function(countries) {
   for (name in country.names) {
     data = pick.country(ebola, name)
     res=exp_fit(data$times, data$cases,
-                theta0=countries[[name]]$theta0,
-                countries[[name]]$start,
+                theta0 = countries[[name]]$theta0,
+                start = countries[[name]]$start,
                 is.cumulative=TRUE 
     )
     lambdas = rbind(lambdas, data.frame(r=res$result["lambda"],
                                         lower=res$result["lower"],
                                         upper=res$result["upper"]))
-    fit = rbind(fit, cbind(data, legend="cases", country=name))
+    fit = rbind(fit, cbind(data, 
+    					   cases.lower=data$cases,
+    					   cases.upper=data$cases,
+    					   legend="cases", country=name))
     fit = rbind(fit, cbind(res$fit, legend="fit", country=name))
   }
   rownames(lambdas) = country.names
@@ -58,11 +61,14 @@ require(ggplot2)
 # The palette with black:
 cbPalette <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
 
-fig <- ggplot(data=fit$fit, aes(x=times, y=cases, shape=legend, col=legend)) +
-    geom_point() + scale_y_log10() + facet_grid(country ~ .) +theme_bw() +
+fig <- ggplot(data=fit$fit, aes(x=times, 
+								y=cases, 
+								ymin=cases.lower,
+								ymax=cases.upper,
+								shape=legend, col=legend)) +
+    geom_pointrange() + scale_y_log10() + facet_grid(country ~ .) +theme_bw() +
     scale_fill_manual(values=cbPalette) +
     scale_colour_manual(values=cbPalette)
-
 
 print(fig)
 
